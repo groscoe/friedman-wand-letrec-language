@@ -7,7 +7,8 @@ This language accepts all expressions accepted by PROC, plus functions can be re
 ## Interesting things the language can do
 
   - Common recursive functions: 
-  ```letproc factorial(x) =
+  ```
+     letproc factorial(x) =
       if equal?(x, 0)
       then 1
       else *(x, factorial(-(x, 1)))
@@ -15,7 +16,8 @@ This language accepts all expressions accepted by PROC, plus functions can be re
   ```
      
   - Higher order recursive functions:
-  ```letproc map(fun, xs) = 
+  ```
+     letproc map(fun, xs) = 
        if null?(xs)
        then emptylist
        else let head = car(xs)
