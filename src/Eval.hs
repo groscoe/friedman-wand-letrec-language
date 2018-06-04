@@ -60,8 +60,10 @@ eval (Unpack _ badExpr _) =
 
 eval (Proc vars body) = gets (VProc vars body)
 
-eval (LetProc name vars funbody inbody) =
-  eval (Let [(name, Proc vars funbody)] inbody)
+eval (LetProc procs inbody) =
+  eval $ LetStar
+  [(name, Proc vars funbody) | (name, vars, funbody) <- procs]
+  inbody
 
 -- TODO: clean this imperative mess
 eval (Apply procName args) = do
@@ -72,12 +74,9 @@ eval (Apply procName args) = do
       then do
         argVals <- traverse eval args
         oldState <- get
-        put procScope
         modify (extendEnv procName (VProc vars body procScope))
         evalArgs vars argVals
-        bodyVal <- eval body
-        put oldState
-        pure bodyVal
+        eval body <* put oldState
       else throwError
            $ "Error: expected " ++ show (length vars) ++ " arguments, got "
            ++ show (length args) ++ ": " ++ procName

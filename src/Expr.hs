@@ -22,7 +22,7 @@ data Expr = I        Int
           | Unpack   [String] Expr Expr
           | Proc     [String] Expr
           | Apply    String [Expr]
-          | LetProc  String [String] Expr Expr
+          | LetProc  [(String, [String], Expr)] Expr
 
 instance Show Expr where
   show (I i) = show i
@@ -42,11 +42,17 @@ instance Show Expr where
   show (Proc vars body) = "proc (" ++ intercalate "," vars ++ ") " ++ show body
   show (Apply func args) =
     func ++ "(" ++ intercalate "," (show <$> args) ++ ")"
-  show (LetProc name vars funbody inbody) =
-    "letproc " ++ name ++ " (" ++ intercalate "," vars ++ ") = " ++ show funbody ++ " in " ++ show inbody
+  show (LetProc procs inbody) =
+    "letproc " ++ showProcs procs ++ " in " ++ show inbody
 
 showAttribs :: [(String, Expr)] -> String
-showAttribs = unwords . fmap (\(name, expr) -> name ++ " = " ++ show expr)
+showAttribs = unwords . fmap showAttrib
+  where showAttrib (name, expr) = name ++ " = " ++ show expr
+
+showProcs :: [(String, [String], Expr)] -> String
+showProcs = unwords . fmap showProc
+  where showProc (name, vars, body) =
+          name ++ "(" ++ intercalate "," vars ++ ") = " ++ show body
 
 showElems :: Expr -> String
 showElems (Cons x Nil) = show x

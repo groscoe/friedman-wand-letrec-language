@@ -49,7 +49,9 @@ parseCons :: Parser Expr
 parseCons = parseBinOp "cons" Cons
 
 parseLetProc :: Parser Expr
-parseLetProc = parseFunctionLike LetProc "letproc"
+parseLetProc = LetProc
+  <$> (tok "letproc" *> many1 (try parseProcAttrib))
+  <*> (tok "in" *> parseExpr)
 
 parseUnpack :: Parser Expr
 parseUnpack = Unpack
@@ -145,6 +147,12 @@ parseAttrib :: Parser (String, Expr)
 parseAttrib =
   (,) <$> (parseIdentifier reserved <* many space) <*> (symbol '=' *> parseExpr)
 
+parseProcAttrib :: Parser (String, [String], Expr)
+parseProcAttrib = (,,)
+  <$> (parseIdentifier reserved <* many space)
+  <*> betweenParens (sepBy (parseIdentifier reserved) (symbol ','))
+  <*> (symbol '=' *> parseExpr)
+
 parseBinOp :: String -> (Expr -> Expr -> Expr) -> Parser Expr
 parseBinOp sym op = func sym *> (uncurry op <$> betweenParens parseOperands)
 
@@ -165,13 +173,6 @@ parseIdentifier reservedNames = do
   let name = first : rest
   guard $ name `notElem` reservedNames
   pure name
-
-parseFunctionLike :: (String -> [String] -> Expr -> Expr -> Expr) -> String -> Parser Expr
-parseFunctionLike constructor constructorString = constructor
-  <$> (tok constructorString *> parseIdentifier reserved <* many space)
-  <*> betweenParens (sepBy (parseIdentifier reserved) (symbol ','))
-  <*> (symbol '=' *> parseExpr)
-  <*> (tok "in" *> parseExpr)
 
 reserved :: S.Set String
 reserved = S.fromList [
