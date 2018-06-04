@@ -11,7 +11,8 @@ This language accepts all expressions accepted by PROC, plus functions can be re
       if equal?(x, 0)
       then 1
       else *(x, factorial(-(x, 1)))
-     in factorial(5)```
+     in factorial(5)
+  ```
      
   - Higher order recursive functions:
   ```letproc map(fun, xs) = 
@@ -22,4 +23,5 @@ This language accepts all expressions accepted by PROC, plus functions can be re
             in cons(fun(head), map(fun, tail))
      in let f = proc(x) +(x, 1)
             xs = list(1,2,3)
-        in map(f, xs)```
+        in map(f, xs)
+  ```
